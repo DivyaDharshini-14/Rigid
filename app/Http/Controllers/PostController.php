@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -46,13 +47,15 @@ class PostController extends Controller
 
     public function edit(Post $post)
     {
-        $this->authorize('update', $post);
-        return view('pages.posts.edit', compact('post'));
+        $users = User::all();
+//        $this->auth('update', $post);
+        return view('pages.posts.edit', compact('post','users'));
     }
+
 
     public function update(Request $request, Post $post)
     {
-        $this->authorize('update', $post);
+//        $this->authorize('update', $post);
 
         $request->validate([
             'title' => 'required|string|max:255',
