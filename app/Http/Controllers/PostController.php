@@ -25,16 +25,24 @@ class PostController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'body' => 'required|string',
+            'image' => 'nullable|image',
+            'file' => 'nullable|mimes:pdf,doc,docx,txt',
         ]);
 
-        Post::create([
-            'user_id' => Auth::id(),
-            'title' => $request->title,
-            'body' => $request->body,
-        ]);
+        if ($request->hasFile('image')) {
+            $validated['image_path'] = $request->file('image')->store('images', 'public');
+        }
+
+        if ($request->hasFile('file')) {
+            $validated['file_path'] = $request->file('file')->store('files', 'public');
+        }
+
+
+        $validated['user_id'] = Auth::id();
+        Post::create($validated);
 
         return redirect()->route('posts.index')->with('success', 'Post created successfully.');
     }
@@ -57,21 +65,31 @@ class PostController extends Controller
     {
 //        $this->authorize('update', $post);
 
-        $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'body' => 'required|string',
+            'image' => 'nullable|image',
+            'file' => 'nullable|mimes:pdf,doc,docx,txt',
         ]);
 
-        $post->update($request->only('title', 'body'));
+        if ($request->hasFile('image')) {
+            $validated['image_path'] = $request->file('image')->store('images', 'public');
+        }
 
-        return redirect()->route('posts.show', $post)->with('success', 'Post updated.');
+        if ($request->hasFile('file')) {
+            $validated['file_path'] = $request->file('file')->store('files', 'public');
+        }
+
+        $post->update($validated);
+
+        return redirect()->route('posts.index', $post)->with('success', 'Post updated.');
     }
 
     public function destroy(Post $post)
     {
-        $this->authorize('delete', $post);
         $post->delete();
 
         return redirect()->route('posts.index')->with('success', 'Post deleted.');
+
     }
 }

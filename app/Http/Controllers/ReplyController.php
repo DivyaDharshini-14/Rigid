@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Comment;
 use App\Models\Reply;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ReplyController extends Controller
 {
@@ -14,10 +15,11 @@ class ReplyController extends Controller
             'body' => 'required|string',
         ]);
 
-        return $comment->replies()->create([
+        $comment->replies()->create([
             'user_id' => Auth::id(),
             'body'    => $request->body,
         ]);
+        return redirect()->route('posts.show', $comment->post);
     }
 
     public function update(Request $request, Reply $reply)
